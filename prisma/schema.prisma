@@ -9,13 +9,90 @@ datasource db {
 }
 
 model User {
-  userId    Int      @id @default(autoincrement())
-  email     String   @unique
+  userId    Int        @id @default(autoincrement())
+  email     String     @unique
   password  String
   name      String?
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role      Role       @default(USER)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  photo     Galery?    @relation(fields: [photoId], references: [galleryId])
+  photoId   Int?
+  messages  Messages[]
+}
+
+model Product {
+  productId     Int            @id @default(autoincrement())
+  name          String
+  description   String
+  price         Float
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  orderProducts OrderProduct[]
+  photo         Galery?        @relation(fields: [photoId], references: [galleryId])
+  photoId       Int?
+}
+
+model Customer {
+  customerId Int      @id @default(autoincrement())
+  name       String
+  email      String
+  phone      String
+  company    String
+  status     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  orders     Order[]
+  photo      Galery?  @relation(fields: [photoId], references: [galleryId])
+  photoId    Int?
+}
+
+model OrderProduct {
+  orderProductId Int     @id @default(autoincrement())
+  orderId        Int
+  productId      Int
+  quantity       Int
+  order          Order   @relation(fields: [orderId], references: [orderId])
+  product        Product @relation(fields: [productId], references: [productId])
+}
+
+model Order {
+  orderId       Int            @id @default(autoincrement())
+  customerId    Int
+  totalAmount   Float
+  status        OrderStatus    @default(PENDING)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  customer      Customer       @relation(fields: [customerId], references: [customerId])
+  orderProducts OrderProduct[]
+}
+
+model Galery {
+  galleryId Int        @id @default(autoincrement())
+  imageUrl  String
+  size      Int
+  mimeType  String
+  createdAt DateTime   @default(now())
+  users     User[]
+  products  Product[]
+  customers Customer[]
+  messages  Messages[]
+}
+
+model Messages {
+  messageId Int      @id @default(autoincrement())
+  senderId  Int
+  content   String
+  timestamp DateTime @default(now())
+  sender    User     @relation(fields: [senderId], references: [userId])
+  photo     Galery?  @relation(fields: [photoId], references: [galleryId])
+  photoId   Int?
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  CANCELED
 }
 
 enum Role {
